@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ng-www": {
+    "ng-wyy": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -39,7 +39,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/ng-www",
+            "outputPath": "dist/ng-wyy",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -94,18 +94,19 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "ng-www:build"
+            "browserTarget": "ng-wyy:build",
+            "proxyConfig": "proxyconfig.json"
           },
           "configurations": {
             "production": {
-              "browserTarget": "ng-www:build:production"
+              "browserTarget": "ng-wyy:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ng-www:build"
+            "browserTarget": "ng-wyy:build"
           }
         },
         "test": {
@@ -143,18 +144,18 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "ng-www:serve"
+            "devServerTarget": "ng-wyy:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "ng-www:serve:production"
+              "devServerTarget": "ng-wyy:serve:production"
             }
           }
         }
       }
     }
   },
-  "defaultProject": "ng-www",
+  "defaultProject": "ng-wyy",
   "cli": {
     "analytics": "2c3dbfc2-26d2-4b32-9fc8-fba61adf0d6a"
   }
