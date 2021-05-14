@@ -1,9 +1,9 @@
-import { Inject, Injectable } from '@angular/core';
-import { API_CONFIG, ServicesModule } from './services.module';
-import{ Observable } from 'rxjs'
 import { HttpClient } from '@angular/common/http';
-import { Banner } from './data-types/common.types';
-import { map } from "rxjs/internal/operators";
+import { Inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/internal/operators';
+import { Banner, HotTag, songSheet } from './data-types/common.types';
+import { API_CONFIG, ServicesModule } from './services.module';
 
 @Injectable({
   providedIn: ServicesModule,
@@ -11,7 +11,24 @@ import { map } from "rxjs/internal/operators";
 export class HomeService {
   constructor(private http: HttpClient, @Inject(API_CONFIG) private uri: string) {}
 
-  getBanners(): Observable<Banner[]> {
-    return this.http.get(this.uri + "banner").pipe(map((res: {banners: Banner[]}) => res.banners));
+  public getBanners(): Observable<Banner[]> {
+    return this.http.get(this.uri + 'banner')
+    .pipe(map((res: {banners: Banner[]}) => res.banners));
+  }
+
+  public getHotTags(): Observable<HotTag[]> {
+    return this.http
+      .get(this.uri + 'playlist/hot')
+      .pipe(map((res: { tags: HotTag[] }) => {
+        return res.tags
+          .sort((x: HotTag, y: HotTag) => x.position - y.position)
+          .slice(0, 5);
+      }));
+  }
+
+  public getPersonalSheetLIst(): Observable<songSheet[]> {
+    return this.http
+      .get(this.uri + 'personalized')
+      .pipe(map((res: { result: songSheet[] }) => res.result.slice(0, 16)));
   }
 }

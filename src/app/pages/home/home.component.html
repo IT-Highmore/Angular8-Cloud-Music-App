@@ -11,7 +11,36 @@
       </div>
     </nz-carousel>
   </app-wy-carousel>
-  <div class="carousel wrap">
-    
+  <div class="main">
+    <div class="wrap">
+      <div class="left">
+        <div class="sec">
+          <div class="up">
+            <div class="navs">
+              <h2>
+                <i></i>
+                <a>热门推荐</a>
+              </h2>
+              <nav>
+                <a *ngFor="let item of hotTags">{{item.name}}</a>
+              </nav>
+            </div>
+            <a>更多
+              <i nz-icon type="arrow-right" theme="outline"></i>
+            </a>
+          </div>
+          <div class="down">
+            <div class="down-wrap">
+              <app-single-sheet *ngFor="let item of someSheetList" [sheet]="item" class="sheet-item">
+
+              </app-single-sheet>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="right">
+        right
+      </div>
+    </div>
   </div>
 </div>
