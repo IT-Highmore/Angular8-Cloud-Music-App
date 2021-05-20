@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/internal/operators';
-import { Banner, HotTag, songSheet } from './data-types/common.types';
+import { Banner, HotTag, SongSheet } from './data-types/common.types';
 import { API_CONFIG, ServicesModule } from './services.module';
 
 @Injectable({
@@ -26,9 +26,9 @@ export class HomeService {
       }));
   }
 
-  public getPersonalSheetLIst(): Observable<songSheet[]> {
+  public getPersonalSheetLIst(): Observable<SongSheet[]> {
     return this.http
       .get(this.uri + 'personalized')
-      .pipe(map((res: { result: songSheet[] }) => res.result.slice(0, 16)));
+      .pipe(map((res: { result: SongSheet[] }) => res.result.slice(0, 16)));
   }
 }

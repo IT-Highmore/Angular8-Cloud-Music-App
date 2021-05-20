@@ -19,3 +19,12 @@ export type SongSheet = {
   picUrl: string;
   playCount: number;
 };
+
+// 歌手
+// tslint:disable-next-line:interface-over-type-literal
+export type Singer = {
+  id: number;
+  name: string;
+  picUrl: string;
+  albumSize: number;
+};
