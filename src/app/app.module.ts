@@ -5,6 +5,7 @@ import { CoreModule } from './core/core.module';
 @NgModule({
   declarations: [AppComponent],
   imports: [CoreModule],
+  // tslint:disable-next-line:object-literal-sort-keys
   bootstrap: [AppComponent],
 })
 export class AppModule {}

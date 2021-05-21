@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NzCarouselComponent } from 'ng-zorro-antd';
 import { map } from 'rxjs/internal/operators/map';
 import { Banner, HotTag, Singer, SongSheet } from 'src/app/services/data-types/common.types';
+import { SheetService } from 'src/app/services/sheet.service';
 
 @Component({
   selector: 'app-home',
@@ -21,13 +22,16 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private sheetService: SheetService,
   ) {
-    this.route.data.pipe(map((res) => res.homeDatas)).subscribe(([banners, hotTags, songSheetList, singers]) => {
-      this.banners = banners;
-      this.hotTags = hotTags;
-      this.someSheetList = songSheetList;
-      this.singers = singers;
-    });
+    this.route.data
+      .pipe(map((res) => res.homeDatas))
+      .subscribe(([banners, hotTags, songSheetList, singers]) => {
+        this.banners = banners;
+        this.hotTags = hotTags;
+        this.someSheetList = songSheetList;
+        this.singers = singers;
+      });
   }
 
   ngOnInit() {}
@@ -36,7 +40,14 @@ export class HomeComponent implements OnInit {
     this.carouselActiveIndex = to;
   }
 
-  onChangeSlide(type: "pre" | "next") {
+  onChangeSlide(type: 'pre' | 'next') {
     this.nzCarousel[type]();
+  }
+
+  public onPlaySheet(id: number) {
+    console.log('id', id);
+    this.sheetService.getSongSheetDetail(id).subscribe((res) => {
+      console.log(res);
+    });
   }
 }

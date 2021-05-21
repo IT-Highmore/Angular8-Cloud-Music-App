@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { SongSheet } from '../../../services/data-types/common.types';
 @Component({
   selector: 'app-single-sheet',
@@ -7,8 +7,17 @@ import { SongSheet } from '../../../services/data-types/common.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SingleSheetComponent implements OnInit {
-  @Input() sheet: SongSheet;
+  @Input() public sheet: SongSheet;
+  // tslint:disable-next-line:no-output-on-prefix
+  @Output() public onPlay = new EventEmitter<Number>();
   constructor() {}
 
-  ngOnInit() {}
+  public ngOnInit() {}
+
+  // tslint:disable-next-line:typedef
+  public playSheet(evt: MouseEvent, id: number) {
+    console.log(1111);
+    evt.stopPropagation();
+    this.onPlay.emit(id);
+  }
 }
