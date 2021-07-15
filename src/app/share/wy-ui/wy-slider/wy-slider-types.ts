@@ -8,7 +8,7 @@ export interface WySliderStyle {
   bottom?: string | null;
 }
 
-
+// tslint:disable-next-line:interface-name
 export interface SliderEventObserverConfig {
   start: string;
   move: string;
