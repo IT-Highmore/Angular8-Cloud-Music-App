@@ -7,7 +7,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WyPlayerComponent implements OnInit {
-
+  public sliderValue = 35;
   constructor() { }
 
   ngOnInit() {

@@ -13,10 +13,11 @@ export class WySliderTrackComponent implements OnInit {
   public style: WySliderStyle = {};
   constructor() {}
 
-  ngOnInit() {}
+  public ngOnInit() {}
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.wyOffset) {
+  // tslint:disable-next-line:use-lifecycle-interface
+  public ngOnChanges(changes: SimpleChanges): void {
+    if (changes.wyLength) {
       if (this.wyVertical) {
         this.style.height = this.wyLength + '%';
         this.style.left = null;

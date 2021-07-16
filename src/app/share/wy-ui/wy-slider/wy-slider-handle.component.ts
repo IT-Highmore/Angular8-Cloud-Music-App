@@ -9,7 +9,7 @@ import { WySliderStyle } from './wy-slider-types';
 })
 export class WySliderHandleComponent implements OnInit, OnChanges {
   @Input() public wyVertical = false;
-  @Input() public wyOffset: number;
+  @Input() public wyLength: number;
   public style: WySliderStyle = {};
   constructor() { }
 
@@ -17,8 +17,8 @@ export class WySliderHandleComponent implements OnInit, OnChanges {
   public ngOnInit() {}
 
   public ngOnChanges(changes: SimpleChanges): void {
-    if (changes.wyOffset) {
-      this.style[this.wyVertical ? 'bottom' : 'left'] = this.wyOffset + '%';
+    if (changes.wyLength) {
+      this.style[this.wyVertical ? 'bottom' : 'left'] = this.wyLength + '%';
     }
   }
 }
