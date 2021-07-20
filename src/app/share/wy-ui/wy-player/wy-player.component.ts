@@ -8,6 +8,7 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 })
 export class WyPlayerComponent implements OnInit {
   public sliderValue = 35;
+  public bufferOffset = 70;
   constructor() { }
 
   ngOnInit() {

@@ -27,6 +27,7 @@ export class WySliderComponent implements OnInit, OnDestroy, ControlValueAccesso
   @Input() public wyVertical: false;
   @Input() public wyMin = 0;
   @Input() public wyMax = 100;
+  @Input() public bufferOffset: SliderValue = 0;
 
   private sliderDom: HTMLDivElement;
   @ViewChild('wySlider', { static: true }) private wySlider: ElementRef;
@@ -46,7 +47,7 @@ export class WySliderComponent implements OnInit, OnDestroy, ControlValueAccesso
 
   private isDragging = false;
   private value: SliderValue = null;
-  private offset: SliderValue = null;
+  public offset: SliderValue = null;
 
   constructor(
     private el: ElementRef,

@@ -3,13 +3,15 @@ import { WySliderStyle } from './wy-slider-types';
 
 @Component({
   selector: 'app-wy-slider-track',
-  template: `<div class="wy-slider-track" [ngStyle]="style"></div>`,
+  template: `<div class='wy-slider-track' [class.buffer]="wyBuffer" [ngStyle]='style'></div>`,
   // tslint:disable-next-line:object-literal-sort-keys
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WySliderTrackComponent implements OnInit {
   @Input() public wyVertical = false;
   @Input() public wyLength: number;
+  @Input() public wyBuffer = false;
+
   public style: WySliderStyle = {};
   constructor() {}
 
