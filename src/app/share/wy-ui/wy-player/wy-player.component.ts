@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } fro
 import { select, Store } from '@ngrx/store';
 import { Song } from 'src/app/services/data-types/common.types';
 import { AppStoreModule } from 'src/app/store';
+import { SetCurrentIndex } from 'src/app/store/actions/player.actions';
 import { getCurrentIndex, getCurrentSong, getPlayer, getPlayList, getPlayMode, getSongList } from 'src/app/store/selectors/player.selector';
 import { PlayMode } from './player-type';
 
@@ -20,6 +21,13 @@ export class WyPlayerComponent implements OnInit {
   public currentSong: Song;
   public duration: number;
   public currentTime: number;
+
+  // 播放状态
+  playing = false;
+  // 是否可以播放
+  songReady = false;
+  // 是否显示列表面板
+  showPanel = false;
   @ViewChild('audio', { static: true }) private audio: ElementRef;
   private audioEl: HTMLAudioElement;
 
@@ -63,19 +71,78 @@ export class WyPlayerComponent implements OnInit {
       this.currentSong = song;
     }
     console.log('song', song, this.currentSong);
-
   }
 
   public onCanPlay() {
+    this.songReady = true;
     this.play();
   }
 
   private play() {
     this.audioEl.play();
-    console.log(this.audioEl);
+    this.playing = true;
   }
   onTimeUpdate(e: Event) {
     this.currentTime = (e.target as HTMLAudioElement).currentTime;
+  }
+
+  // 上一曲
+  onPrev(index: number) {
+    if (!this.songReady) {
+      return;
+    }
+    if (this.playList.length === 1) {
+      this.loop();
+    } else {
+      const newIndex = index < 0 ? this.playList.length - 1 : index;
+      this.updateIndex(newIndex);
+    }
+  }
+
+  // 下一曲
+  onNext(index: number) {
+    if (!this.songReady) {
+      return;
+    }
+    if (this.playList.length === 1) {
+      this.loop();
+    } else {
+      const newIndex = index >= this.playList.length ? 0 : index;
+      this.updateIndex(newIndex);
+    }
+  }
+
+  // 播放暂停
+  onToggle() {
+    if (!this.currentSong) {
+      if (this.playList.length) {
+        this.store$.dispatch(SetCurrentIndex({ currentIndex: 0 }));
+        this.songReady = false;
+      }
+    } else {
+      if (this.songReady) {
+        this.playing = !this.playing;
+        if (this.playing) {
+          this.audioEl.play();
+        } else {
+          this.audioEl.pause();
+        }
+      }
+    }
+  }
+
+  // 单曲循环
+  private loop() {
+    this.audioEl.currentTime = 0;
+    this.play();
+    // if (this.playerPanel) {
+    //   this.playerPanel.seekLyric(0);
+    // }
+  }
+
+  private updateIndex(index: number) {
+    this.store$.dispatch(SetCurrentIndex({ currentIndex: index }));
+    this.songReady = false;
   }
 
   get picUrl(): string {
