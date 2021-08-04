@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectorRef, forwardRef, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, forwardRef, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { ChangeDetectionStrategy, Component, ElementRef, Inject, Input, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { fromEvent, merge, Observable, Subscription } from 'rxjs';
@@ -16,19 +16,22 @@ import { SliderEventObserverConfig, SliderValue } from './wy-slider-types';
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   // 自定义表单控件,注入token
-  providers: [{
-    provide: NG_VALUE_ACCESSOR,
-    useExisting: forwardRef(() => WySliderComponent),
-    // tslint:disable-next-line:object-literal-sort-keys
-    multi: true,
-  }],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => WySliderComponent),
+      // tslint:disable-next-line:object-literal-sort-keys
+      multi: true,
+    },
+  ],
 })
-export class WySliderComponent implements OnInit, OnDestroy, ControlValueAccessor {
+export class WySliderComponent
+  implements OnInit, OnDestroy, ControlValueAccessor {
   @Input() public wyVertical: false;
   @Input() public wyMin = 0;
   @Input() public wyMax = 100;
   @Input() public bufferOffset: SliderValue = 0;
-
+  @Output() wyOnAfterChange = new EventEmitter<SliderValue>();
   private sliderDom: HTMLDivElement;
   @ViewChild('wySlider', { static: true }) private wySlider: ElementRef;
 
@@ -52,7 +55,7 @@ export class WySliderComponent implements OnInit, OnDestroy, ControlValueAccesso
   constructor(
     private el: ElementRef,
     @Inject(DOCUMENT) private doc: Document,
-    private cdr: ChangeDetectorRef,
+    private cdr: ChangeDetectorRef
   ) {}
 
   // tslint:disable-next-line:typedef
@@ -94,7 +97,7 @@ export class WySliderComponent implements OnInit, OnDestroy, ControlValueAccesso
         filter(filerFunc),
         tap(sliderEvent),
         pluck(...pluckKey),
-        map((position: number) => this.findCloseValue(position)),
+        map((position: number) => this.findCloseValue(position))
       );
 
       source.end$ = fromEvent(this.doc, end);
@@ -104,7 +107,7 @@ export class WySliderComponent implements OnInit, OnDestroy, ControlValueAccesso
         pluck(...pluckKey),
         distinctUntilChanged(),
         map((position: number) => this.findCloseValue(position)),
-        takeUntil(source.end$),
+        takeUntil(source.end$)
       );
 
       this.dragStart$ = merge(mouse.startPlucked$, touch.startPlucked$);
@@ -122,7 +125,10 @@ export class WySliderComponent implements OnInit, OnDestroy, ControlValueAccesso
 
     // 滑块当前位置/滑块总长
     const ratio = limitNumberInRange(
-      (position - sliderStart) / sliderLength, 0, 1);
+      (position - sliderStart) / sliderLength,
+      0,
+      1
+    );
     const radioTrue = this.wyVertical ? 1 - ratio : ratio;
     return radioTrue * (this.wyMax - this.wyMin) + this.wyMin;
   }
@@ -189,7 +195,7 @@ export class WySliderComponent implements OnInit, OnDestroy, ControlValueAccesso
   }
   // tslint:disable-next-line:typedef
   private onDragEnd() {
-    // this.wyOnAfterChange.emit(this.value);
+    this.wyOnAfterChange.emit(this.value);
     this.toggleDragMoving(false);
     this.cdr.markForCheck();
   }
@@ -222,9 +228,7 @@ export class WySliderComponent implements OnInit, OnDestroy, ControlValueAccesso
   private onValueChange(value: SliderValue): void {
     throw new Error('Method not implemented.');
   }
-  private onTouched(): void {
-
-  }
+  private onTouched(): void {}
   private updateTrackAndHandles() {
     this.offset = this.getValueToOffset(this.value);
     this.cdr.markForCheck();

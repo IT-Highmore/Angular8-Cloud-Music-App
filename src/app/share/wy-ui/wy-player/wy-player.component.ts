@@ -1,3 +1,4 @@
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { Song } from 'src/app/services/data-types/common.types';
@@ -13,8 +14,8 @@ import { PlayMode } from './player-type';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WyPlayerComponent implements OnInit {
-  public sliderValue = 35;
-  public bufferOffset = 70;
+  public percent = 0;
+  public bufferPercent = 0;
   public songList: Song[];
   public playList: Song[];
   public currentIndex: number;
@@ -28,6 +29,7 @@ export class WyPlayerComponent implements OnInit {
   songReady = false;
   // 是否显示列表面板
   showPanel = false;
+
   @ViewChild('audio', { static: true }) private audio: ElementRef;
   private audioEl: HTMLAudioElement;
 
@@ -52,9 +54,10 @@ export class WyPlayerComponent implements OnInit {
   }
 
   public ngOnInit() {
-    console.log('audio', this.audio.nativeElement);
     this.audioEl = this.audio.nativeElement;
   }
+
+
   private watchList(list: Song[], type: string) {
     this[type] = list;
   }
@@ -69,8 +72,9 @@ export class WyPlayerComponent implements OnInit {
     if (song) {
       this.duration = song.dt / 1000;
       this.currentSong = song;
+      this.bufferPercent = 0;
     }
-    console.log('song', song, this.currentSong);
+    console.log('song', this.currentSong);
   }
 
   public onCanPlay() {
@@ -82,8 +86,17 @@ export class WyPlayerComponent implements OnInit {
     this.audioEl.play();
     this.playing = true;
   }
+  onPercentChange(per: number) {
+    this.audioEl.currentTime = this.duration * (per / 100);
+  }
+
   onTimeUpdate(e: Event) {
     this.currentTime = (e.target as HTMLAudioElement).currentTime;
+    this.percent = (this.currentTime / this.duration) * 100;
+    const buffered = this.audioEl.buffered;
+    if (buffered.length && this.bufferPercent < 100) {
+      this.bufferPercent = (buffered.end(0) / this.duration) * 100;
+    }
   }
 
   // 上一曲
@@ -112,12 +125,12 @@ export class WyPlayerComponent implements OnInit {
     }
   }
 
+
   // 播放暂停
   onToggle() {
     if (!this.currentSong) {
       if (this.playList.length) {
-        this.store$.dispatch(SetCurrentIndex({ currentIndex: 0 }));
-        this.songReady = false;
+        this.updateIndex(0);
       }
     } else {
       if (this.songReady) {
