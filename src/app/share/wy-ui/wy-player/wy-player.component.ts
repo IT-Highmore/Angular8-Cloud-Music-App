@@ -1,6 +1,8 @@
+import { DOCUMENT } from '@angular/common';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
-import { ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { select, Store } from '@ngrx/store';
+import { fromEvent, Subscription } from 'rxjs';
 import { Song } from 'src/app/services/data-types/common.types';
 import { AppStoreModule } from 'src/app/store';
 import { SetCurrentIndex } from 'src/app/store/actions/player.actions';
@@ -29,11 +31,24 @@ export class WyPlayerComponent implements OnInit {
   songReady = false;
   // 是否显示列表面板
   showPanel = false;
+  // 音量
+  volume = 60;
+
+  // 是否显示音量面板
+  showVolumnPanel = false;
+
+  // 是否点击的是音量面板本身
+  selfClick = false;
+
+  private winClick: Subscription;
 
   @ViewChild('audio', { static: true }) private audio: ElementRef;
   private audioEl: HTMLAudioElement;
 
-  constructor(private store$: Store<AppStoreModule>) {
+  constructor(
+    private store$: Store<AppStoreModule>,
+    @Inject(DOCUMENT) private doc: Document
+  ) {
     const appStore$ = this.store$.pipe(select(getPlayer));
     appStore$
       .pipe(select(getSongList))
@@ -56,7 +71,6 @@ export class WyPlayerComponent implements OnInit {
   public ngOnInit() {
     this.audioEl = this.audio.nativeElement;
   }
-
 
   private watchList(list: Song[], type: string) {
     this[type] = list;
@@ -87,7 +101,46 @@ export class WyPlayerComponent implements OnInit {
     this.playing = true;
   }
   onPercentChange(per: number) {
-    this.audioEl.currentTime = this.duration * (per / 100);
+    if (this.currentSong) {
+      this.audioEl.currentTime = this.duration * (per / 100);
+    }
+  }
+  // 控制音量
+  onVolumeChange(per: number) {
+    this.audioEl.volume = per / 100; // 音量是0-1
+  }
+
+  // 控制音量面板
+  toggleVolPanel() {
+    this.togglePanel();
+  }
+
+  togglePanel() {
+    this.showVolumnPanel = !this.showVolumnPanel;
+    if (this.showVolumnPanel) {
+      this.bindDocumentClickListener();
+    } else {
+      this.unbindDocumentClickListener();
+    }
+  }
+
+  private bindDocumentClickListener() {
+    if (!this.winClick) {
+      this.winClick = fromEvent(this.doc, 'click').subscribe(() => {
+        if (!this.selfClick) { // 说明点了播放器以外的部分
+          this.showVolumnPanel = false;
+          this.bindDocumentClickListener();
+        }
+        this.selfClick = false;
+      });
+    }
+  }
+
+  private unbindDocumentClickListener() {
+    if (this.winClick) {
+      this.winClick.unsubscribe();
+      this.winClick = null;
+    }
   }
 
   onTimeUpdate(e: Event) {
@@ -124,7 +177,6 @@ export class WyPlayerComponent implements OnInit {
       this.updateIndex(newIndex);
     }
   }
-
 
   // 播放暂停
   onToggle() {
