@@ -1,14 +1,24 @@
 import { DOCUMENT } from '@angular/common';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { ChangeDetectionStrategy, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { fromEvent, Subscription } from 'rxjs';
 import { Song } from 'src/app/services/data-types/common.types';
 import { AppStoreModule } from 'src/app/store';
-import { SetCurrentIndex } from 'src/app/store/actions/player.actions';
+import { SetCurrentIndex, SetPlayList, SetPlayMode } from 'src/app/store/actions/player.actions';
 import { getCurrentIndex, getCurrentSong, getPlayer, getPlayList, getPlayMode, getSongList } from 'src/app/store/selectors/player.selector';
+import { shuffle } from 'src/app/utils/array';
 import { PlayMode } from './player-type';
 
+const modeTypes: PlayMode[] = [{
+  type: 'loop',
+  label: '循环'
+}, {
+  type: 'random',
+  label: '随机'
+}, {
+  type: 'singleLoop',
+  label: '单曲循环'
+}];
 @Component({
   selector: 'app-wy-player',
   templateUrl: './wy-player.component.html',
@@ -40,6 +50,9 @@ export class WyPlayerComponent implements OnInit {
   // 是否点击的是音量面板本身
   selfClick = false;
 
+  // 当前模式
+  currentMode: PlayMode;
+  modeCount = 0;
   private winClick: Subscription;
 
   @ViewChild('audio', { static: true }) private audio: ElementRef;
@@ -79,7 +92,16 @@ export class WyPlayerComponent implements OnInit {
     this.currentIndex = index;
   }
   private watchPlayMode(mode: PlayMode) {
-    console.log('mode', mode);
+    // console.log('mode', mode);
+    this.currentMode = mode;
+    if (this.songList) {
+      let list = this.songList.slice();
+      if (mode.type === 'random') {
+        list = shuffle(this.songList);
+        this.updateCurrentIndex(list, this.currentSong);
+        this.store$.dispatch(SetPlayList({ playList: list }));
+      }
+    }
   }
 
   private watchCurrentSong(song: Song) {
@@ -88,7 +110,12 @@ export class WyPlayerComponent implements OnInit {
       this.currentSong = song;
       this.bufferPercent = 0;
     }
-    console.log('song', this.currentSong);
+    // console.log('song', this.currentSong);
+  }
+
+  private updateCurrentIndex(list: Song[], song: Song) {
+    const newIndex = list.findIndex((item) => item.id === song.id);
+    this.store$.dispatch(SetCurrentIndex({ currentIndex: newIndex }));
   }
 
   public onCanPlay() {
@@ -123,11 +150,17 @@ export class WyPlayerComponent implements OnInit {
       this.unbindDocumentClickListener();
     }
   }
+  // 改变模式
+  changeMode() {
+    const temp = modeTypes[++this.modeCount % 3];
+    this.store$.dispatch(SetPlayMode({ playMode: temp }));
+  }
 
   private bindDocumentClickListener() {
     if (!this.winClick) {
       this.winClick = fromEvent(this.doc, 'click').subscribe(() => {
-        if (!this.selfClick) { // 说明点了播放器以外的部分
+        if (!this.selfClick) {
+          // 说明点了播放器以外的部分
           this.showVolumnPanel = false;
           this.bindDocumentClickListener();
         }
@@ -177,6 +210,18 @@ export class WyPlayerComponent implements OnInit {
       this.updateIndex(newIndex);
     }
   }
+
+  // 播放结束
+  onEnded() {
+    this.playing = false;
+    if (this.currentMode.type === 'singleLoop') {
+      this.loop();
+    } else {
+      this.onNext(this.currentIndex + 1);
+    }
+  }
+
+  onError() {}
 
   // 播放暂停
   onToggle() {
